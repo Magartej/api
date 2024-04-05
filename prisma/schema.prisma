@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model House{
+  id String @id @default(uuid())
+  userId String
+  title String @db.Text
+  description String
+  image String
+  provience String
+  district String
+  locallevel String
+  lcoalarea String
+  locationdescription String @db.LongText
+  freewifi Boolean @default(false)
+  laundry Boolean @default(false)
+  freeparking Boolean @default(false)
+  watersupply Boolean @default(false)
+  electricity Boolean @default(false)
+  addedAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  rooms Room[]
+  bookings Booking[]
+
+  @@fulltext([title])
+}
+
+model Room{
+  id String @id @default(uuid())
+  title String
+  description String @db.LongText
+  bedCount Int @default(0)
+  singleBed Int @default(0)
+  doubleBed Int @default(0)
+  image String
+  breakFastPrice Int 
+  roomPrice Int
+  roomservice Boolean @default(false)
+  TV Boolean @default(false)
+  Balcony Boolean @default(false)
+  freewifi Boolean @default(false)
+  aircondition Boolean @default(false)
+  houseId String
+  
+  House House? @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  Booking Booking[]
+
+  @@index([houseId])
+}
+
+model Booking{
+  id String @id @default(uuid())
+  userName String
+  userId String
+  roomId String
+  houseId String
+  houseOnerID String
+  startDate DateTime
+  endDate DateTime
+  breakfastIncluded Boolean
+  currency String
+  totalPrice Int
+  paymentStatus Boolean @default(false)
+  paymentIntentId String @unique
+  bookedAt DateTime @default(now())
+
+  House House? @relation(fields: [houseId], references: [id])
+  Room Room? @relation(fields: [roomId], references: [id])
+
+  @@index([houseId])
+  @@index([roomId])
+}
